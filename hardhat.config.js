@@ -1,8 +1,10 @@
-require("@nomicfoundation/hardhat-toolbox");
+// require("@nomicfoundation/hardhat-toolbox");
 // require("@nomiclabs/hardhat-waffle");
 require("@nomicfoundation/hardhat-verify");
 require("dotenv").config();
 require("./tasks/block-number");
+require("hardhat-gas-reporter");
+require("solidity-coverage");
 
 const SEPHOLIA_RPC_URL =
     process.env.SEPHOLIA_RPC_URL || "http://localhost:8545";
@@ -29,6 +31,13 @@ module.exports = {
         localhost: {
             url: "http://localhost:8545",
             chainId: 1337,
+        },
+        gasReporter: {
+            currency: "USD",
+            outputFile: "gas-report.txt",
+            noColors: true,
+            coinMarketCap: process.env.COINMARKETCAP_API_KEY,
+            url: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest",
         },
     },
     solidity: "0.8.8",
