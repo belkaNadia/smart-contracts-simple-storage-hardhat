@@ -21,7 +21,7 @@ async function main() {
 
         // Not functionable in version 6^ ethers ----->
 
-        await simpleStorage.deploymentTransaction().wait(6);
+        await simpleStorage.deployed();
         await verify(simpleStorage.target, []);
 
         //______________________________________________
