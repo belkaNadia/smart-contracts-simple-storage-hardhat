@@ -1,51 +1,60 @@
+// imports
 const { ethers, run, network } = require("hardhat");
 
+// async main
 async function main() {
-    const simpleStorageFactory =
+    const SimpleStorageFactory =
         await ethers.getContractFactory("SimpleStorage");
+    console.log("Deploying contract...");
+    const simpleStorage = await SimpleStorageFactory.deploy();
 
-    console.log("Deploying SimpleStorage...");
+    // Not functionable in version 6^ ethers ----->
 
-    const simpleStorage = await simpleStorageFactory.deploy();
-    console.log("Deployment transaction:", simpleStorage.deployTransaction);
+    // await simpleStorage.deployed()
+    // console.log(`Deployed contract to: ${simpleStorage.address}`)
 
-    await simpleStorage.waitForDeployment();
+    //______________________________________________
 
-    console.log("SimpleStorage deployed to:", simpleStorage);
-    console.log(network.config);
-    if (network.config.name === "sepolia" && process.env.ETHERSCAN_API_KEY) {
-        console.log("Verifying contract...");
-        await simpleStorage.deploymentTransaction.wait(6); // wait for 6 confirmations
-        await verify(simpleStorage.address, []);
+    // what happens when we deploy to our hardhat network?
+    if (network.config.chainId === 11155111 && process.env.ETHERSCAN_API_KEY) {
+        console.log("Waiting for block confirmations...");
+
+        // Not functionable in version 6^ ethers ----->
+
+        await simpleStorage.deploymentTransaction().wait(6);
+        await verify(simpleStorage.target, []);
+
+        //______________________________________________
     }
 
     const currentValue = await simpleStorage.retrieve();
-    console.log(`Current value: ${currentValue}`);
+    console.log(`Current Value is: ${currentValue}`);
 
-    //Update the value
-    const transaction = await simpleStorage.store(42);
-    await transaction.wait(1);
+    // Update the current value
+    const transactionResponse = await simpleStorage.store(7);
+    await transactionResponse.wait(1);
     const updatedValue = await simpleStorage.retrieve();
-    console.log(`Updated value:", ${updatedValue}`);
+    console.log(`Updated Value is: ${updatedValue}`);
 }
 
-async function verify(contractAddress, args) {
-    console.log("Verifying contract at address:", contractAddress);
+// async function verify(contractAddress, args) {
+const verify = async (contractAddress, args) => {
+    console.log("Verifying contract...");
     try {
         await run("verify:verify", {
             address: contractAddress,
             constructorArguments: args,
         });
-        console.log("Contract verified!");
-    } catch (err) {
-        if (err.message.includes("Contract source code already verified")) {
-            console.log("Contract already verified!");
+    } catch (e) {
+        if (e.message.toLowerCase().includes("already verified")) {
+            console.log("Already Verified!");
         } else {
-            console.error(err);
+            console.log(e);
         }
     }
-}
+};
 
+// main
 main()
     .then(() => process.exit(0))
     .catch((error) => {
